@@ -13,8 +13,7 @@ fn main() {
             Some(p) => p.is_valid(),
             None => false,
         })
-        .collect::<Vec<_>>()
-        .len();
+        .count();
     println!("{:?}", result);
 }
 
@@ -30,25 +29,24 @@ impl Password {
     fn new(s: &str) -> Option<Password> {
         let re_password = Regex::new(r"^(\d+)-(\d+)\s+([a-z]):\s+(\S+)$").unwrap();
 
-        match re_password.is_match(s) {
-            true => {
-                let elems = re_password.captures(s).unwrap();
-                return Some(Password {
-                    rule_min: elems
-                        .get(1)
-                        .map_or(0, |m| m.as_str().parse::<usize>().unwrap()),
-                    rule_max: elems
-                        .get(2)
-                        .map_or(0, |m| m.as_str().parse::<usize>().unwrap()),
-                    rule_char: elems
-                        .get(3)
-                        .map_or(' ', |m| m.as_str().as_bytes()[0] as char),
-                    value: elems
-                        .get(4)
-                        .map_or(String::new(), |m| m.as_str().to_string()),
-                });
-            }
-            _ => return None,
+        if re_password.is_match(s) {
+            let elems = re_password.captures(s).unwrap();
+            Some(Password {
+                rule_min: elems
+                    .get(1)
+                    .map_or(0, |m| m.as_str().parse::<usize>().unwrap()),
+                rule_max: elems
+                    .get(2)
+                    .map_or(0, |m| m.as_str().parse::<usize>().unwrap()),
+                rule_char: elems
+                    .get(3)
+                    .map_or(' ', |m| m.as_str().as_bytes()[0] as char),
+                value: elems
+                    .get(4)
+                    .map_or(String::new(), |m| m.as_str().to_string()),
+            })
+        } else {
+            None
         }
     }
 
