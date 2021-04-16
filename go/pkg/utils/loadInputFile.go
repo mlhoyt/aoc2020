@@ -4,17 +4,18 @@ import (
 	"bufio"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-func LoadInputFile(name string) ([]string, error) {
+func LoadInputFile(name string) (string, error) {
 	absName, err := filepath.Abs("input/" + name)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	ifh, err := os.Open(absName)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer ifh.Close()
 
@@ -25,8 +26,8 @@ func LoadInputFile(name string) ([]string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return lines, nil
+	return strings.Join(lines, "\n"), nil
 }
