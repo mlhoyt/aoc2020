@@ -22,11 +22,11 @@ func main() {
 	groups := numberListToNumberGroups(numbers)
 
 	answers := filterNumberList(groups, func(p numberList) bool {
-		return p[0]+p[1] == 2020
+		return p[0]+p[1]+p[2] == 2020
 	})
 
 	for _, answer := range answers {
-		fmt.Printf("%d * %d = %d\n", answer[0], answer[1], (answer[0] * answer[1]))
+		fmt.Printf("%d * %d * %d = %d\n", answer[0], answer[1], answer[2], (answer[0] * answer[1] * answer[2]))
 	}
 }
 
@@ -55,8 +55,10 @@ func newNumberList(ns ...number) numberList {
 func numberListToNumberGroups(ns []number) []numberList {
 	results := []numberList{}
 	for ai, a := range ns {
-		for _, b := range ns[(ai + 1):] {
-			results = append(results, newNumberList(a, b))
+		for bi, b := range ns[(ai + 1):] {
+			for _, c := range ns[(bi + 1):] {
+				results = append(results, newNumberList(a, b, c))
+			}
 		}
 	}
 
