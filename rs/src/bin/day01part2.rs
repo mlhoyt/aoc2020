@@ -31,7 +31,7 @@ fn generate_groups(xs: &[i32]) -> Vec<(i32, i32, i32)> {
         }
     }
 
-    return groups;
+    groups
 }
 
 #[test]
