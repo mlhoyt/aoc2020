@@ -1,0 +1,69 @@
+package policyandpasswordparser
+
+type parser Peg {
+  policyRangeMin int
+  policyRangeMax int
+  policyChar byte
+  password string
+
+  _number int
+  _letter byte
+}
+
+PasswordAndPolicy
+  <- Policy _ Password END
+
+Policy
+  <- PolicyRangeMin '-' PolicyRangeMax _ PolicyChar ':'
+
+Password
+  <- < [a-z]+ >
+     {
+       p.password = text
+     }
+
+PolicyRangeMin
+  <- Number
+     {
+       p.policyRangeMin = p._number
+     }
+
+PolicyRangeMax
+  <- Number
+     {
+       p.policyRangeMax = p._number
+     }
+
+PolicyChar
+  <- Letter
+     {
+       p.policyChar = p._letter
+     }
+
+Number
+  <- < [0-9]+ >
+     {
+       n, _ := strconv.Atoi(text)
+       p._number = n
+     }
+
+Letter
+  <- < [a-z] > 
+     {
+       p._letter = text[0]
+     }
+
+_
+  <- WS+
+
+WS
+  <- ' '
+  /  '\t'
+  /  EOL
+
+EOL
+  <- '\r\n'
+  /  '\n'
+  /  '\r'
+
+END <- !.
