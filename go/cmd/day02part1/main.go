@@ -14,17 +14,43 @@ func main() {
 		panic(err)
 	}
 
-	items, err := stringListToPasswordAndPolicyList(strings.Split(input, "\n"))
+	items, err := stringList(strings.Split(input, "\n")).MapToPolicyAndPasswordList(newPolicyAndPasswordFromString)
 	if err != nil {
 		panic(err)
 	}
 
-	items = filterPolicyAndPasswordList(items, func(x policyAndPassword) bool {
-		count := strings.Count(string(x.password), string(x.policy.Character))
-		return count >= x.policy.RangeMin && count <= x.policy.RangeMax
-	})
+	items = items.Filter(policyAndPasswordIsValid)
 
 	fmt.Printf("%d\n", len(items))
+}
+
+type stringList []string
+
+func (self stringList) MapToPolicyAndPasswordList(f func(string) (policyAndPassword, error)) (policyAndPasswordList, error) {
+	items := policyAndPasswordList{}
+	for _, s := range self {
+		item, err := f(s)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
+type policyAndPasswordList []policyAndPassword
+
+func (self policyAndPasswordList) Filter(f func(policyAndPassword) bool) policyAndPasswordList {
+	items := policyAndPasswordList{}
+	for _, item := range self {
+		if f(item) {
+			items = append(items, item)
+		}
+	}
+
+	return items
 }
 
 type policyAndPassword struct {
@@ -32,29 +58,12 @@ type policyAndPassword struct {
 	password parser.Password
 }
 
-type policyAndPasswordList []policyAndPassword
-
-func stringListToPasswordAndPolicyList(ss []string) (policyAndPasswordList, error) {
-	items := policyAndPasswordList{}
-	for _, s := range ss {
-		policy, password, err := parser.Parse(s)
-		if err != nil {
-			return nil, err
-		}
-
-		items = append(items, policyAndPassword{policy, password})
-	}
-
-	return items, nil
+func newPolicyAndPasswordFromString(s string) (policyAndPassword, error) {
+	policy, password, err := parser.Parse(s)
+	return policyAndPassword{policy, password}, err
 }
 
-func filterPolicyAndPasswordList(xs policyAndPasswordList, f func(policyAndPassword) bool) policyAndPasswordList {
-	results := policyAndPasswordList{}
-	for _, x := range xs {
-		if f(x) {
-			results = append(results, x)
-		}
-	}
-
-	return results
+func policyAndPasswordIsValid(x policyAndPassword) bool {
+	count := strings.Count(string(x.password), string(x.policy.Character))
+	return count >= x.policy.RangeMin && count <= x.policy.RangeMax
 }
