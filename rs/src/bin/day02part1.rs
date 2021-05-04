@@ -16,7 +16,10 @@ pub struct Policy {
     character: u8,
 }
 
-pub struct PolicyAndPassword(Policy, String);
+pub struct PolicyAndPassword {
+    policy: Policy,
+    password: String,
+}
 
 impl FromStr for PolicyAndPassword {
     type Err = peg::error::ParseError<peg::str::LineCol>;
@@ -27,8 +30,8 @@ impl FromStr for PolicyAndPassword {
 }
 
 fn policy_and_password_is_valid(x: &PolicyAndPassword) -> bool {
-    let count = x.1.matches(x.0.character as char).count();
-    count >= x.0.range_min && count <= x.0.range_max
+    let count = x.password.matches(x.policy.character as char).count();
+    count >= x.policy.range_min && count <= x.policy.range_max
 }
 
 peg::parser! {
@@ -36,7 +39,7 @@ peg::parser! {
         pub rule Parse() -> PolicyAndPassword
             = policy:policy() space() password:string()
               {
-                  PolicyAndPassword(policy, password.to_string())
+                  PolicyAndPassword{policy, password: password.to_string()}
               }
 
         rule policy() -> Policy
