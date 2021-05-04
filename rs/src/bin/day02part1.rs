@@ -4,8 +4,8 @@ fn main() {
     let input = include_str!("../../input/day02.txt");
     let result = input
         .lines()
-        .map(|line| line.parse().unwrap())
-        .filter(policy_and_password_is_valid)
+        .map(|line| line.parse::<PolicyAndPassword>().unwrap())
+        .filter(|x| x.is_valid())
         .count();
     println!("{}", result);
 }
@@ -29,9 +29,11 @@ impl FromStr for PolicyAndPassword {
     }
 }
 
-fn policy_and_password_is_valid(x: &PolicyAndPassword) -> bool {
-    let count = x.password.matches(x.policy.character as char).count();
-    count >= x.policy.range_min && count <= x.policy.range_max
+impl PolicyAndPassword {
+    fn is_valid(&self) -> bool {
+        let count = self.password.matches(self.policy.character as char).count();
+        count >= self.policy.range_min && count <= self.policy.range_max
+    }
 }
 
 peg::parser! {
