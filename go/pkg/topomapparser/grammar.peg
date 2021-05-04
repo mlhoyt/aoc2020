@@ -1,0 +1,34 @@
+package topomapparser
+
+type parser Peg {
+  topoMap TopoMap
+}
+
+TopoMap
+  <- TopoRow+ END
+
+TopoRow
+  <- TopoItems EOL?
+
+TopoItems
+  <- < [.#]+ >
+     {
+       topoRow := []TopoItem{}
+       for _, ti := range []byte(text) {
+         switch ti {
+           case byte(TopoTree):
+             topoRow = append(topoRow, TopoTree)
+           case byte(TopoSpace):
+             topoRow = append(topoRow, TopoSpace)
+         }
+       }
+
+       p.topoMap = append(p.topoMap, topoRow)
+     }
+
+EOL
+  <- '\r\n'
+  /  '\n'
+  /  '\r'
+
+END <- !.
