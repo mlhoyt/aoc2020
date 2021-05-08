@@ -1,26 +1,95 @@
 fn main() {
     let input = include_str!("../../input/day03.txt");
-    let topo_map = input
-        .lines()
-        .map(|line| line.chars().collect::<Vec<_>>())
-        .collect::<Vec<_>>();
-
+    let topo_map = new_topo_map(input);
     let result = traverse(&topo_map, 3, 1);
     println!("{:?}", result);
 }
 
-fn traverse(tm: &Vec<Vec<char>>, x: usize, y: usize) -> usize {
-    traverse_step(tm, x, y, x, y)
+fn new_topo_map(input: &str) -> TopoMap {
+    parser::Parse(input).unwrap()
 }
 
-fn traverse_step(tm: &Vec<Vec<char>>, x: usize, y: usize, cx: usize, cy: usize) -> usize {
-    if cy >= tm.len() {
-        return 0;
+type TopoMap = Vec<Vec<TopoItem>>;
+
+#[derive(PartialEq)]
+pub enum TopoItem {
+    TopoTree,
+    TopoSpace,
+}
+
+peg::parser! {
+    grammar parser() for str {
+        pub rule Parse() -> TopoMap
+            = rows:row() ++ eol()
+              {
+                 rows
+              }
+
+        rule row() -> Vec<TopoItem>
+            = items:( topoTree() / topoSpace() )+
+              {
+                  items
+              }
+
+        rule topoTree() -> TopoItem
+            = item:$(['#'])
+              {
+                  TopoItem::TopoTree
+              }
+
+        rule topoSpace() -> TopoItem
+            = item:$(['.'])
+              {
+                  TopoItem::TopoSpace
+              }
+
+        rule eol()
+            = "\n"
+            / "\r"
+            / "\r" "\n"
+    }
+}
+
+struct Position {
+    x: usize,
+    y: usize,
+}
+
+impl Position {
+    fn new() -> Self {
+        Self { x: 0, y: 0 }
     }
 
-    let cx = cx % tm[0].len();
+    fn is_on_map(&self, m: &TopoMap) -> bool {
+        self.y < m.len()
+    }
 
-    let hit = if tm[cy][cx] == '#' { 1 } else { 0 };
+    fn is_hit(&self, m: &TopoMap) -> bool {
+        let nx = self.x % m[0].len();
+        let ny = self.y;
 
-    hit as usize + traverse_step(tm, x, y, cx + x, cy + y)
+        m[ny][nx] == TopoItem::TopoTree
+    }
+
+    fn step(&self, x: usize, y: usize) -> Self {
+        Self {
+            x: self.x + x,
+            y: self.y + y,
+        }
+    }
+}
+
+fn traverse(m: &TopoMap, x: usize, y: usize) -> usize {
+    let mut hits = 0;
+
+    let mut curr = Position::new();
+    while curr.is_on_map(m) {
+        if curr.is_hit(m) {
+            hits += 1;
+        }
+
+        curr = curr.step(x, y);
+    }
+
+    return hits;
 }
