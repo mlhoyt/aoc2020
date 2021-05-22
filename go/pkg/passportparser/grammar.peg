@@ -1,0 +1,158 @@
+package passportparser
+
+type parser Peg {
+  passport Passport
+
+  _number int
+  _string string
+}
+
+Grammar
+  <- PassportAttribute+ END
+
+PassportAttribute
+  <- BirthYear Spacing
+  /  IssueYear Spacing
+  /  ExpirationYear Spacing
+  /  Height Spacing
+  /  HairColor Spacing
+  /  EyeColor Spacing
+  /  PassportID Spacing
+  /  CountryID Spacing
+
+BirthYear
+  <- "byr:" Number
+     {
+	     // byr (Birth Year) - four digits; at least 1920 and at most 2002.
+       if p._number >= 1920 && p._number <= 2002 {
+         p.passport.byr = p._number
+       }
+     }
+
+IssueYear
+  <- "iyr:" Number
+     {
+	     // iyr (Issue Year) - four digits; at least 2010 and at most 2020.
+       if p._number >= 2010 && p._number <= 2020 {
+         p.passport.iyr = p._number
+       }
+     }
+
+ExpirationYear
+  <- "eyr:" Number
+     {
+	     // eyr (Expiration Year) - four digits; at least 2020 and at most 2030.
+       if p._number >= 2020 && p._number <= 2030 {
+         p.passport.eyr = p._number
+       }
+     }
+
+Height
+  <- "hgt:" Number Dimension
+     {
+	     // hgt (Height) - a number followed by either cm or in:
+       switch dimension(p._string) {
+       case dimensionCM:
+	       // If cm, the number must be at least 150 and at most 193.
+         if p._number >= 150 && p._number <= 193 {
+           p.passport.hgt.value = p._number
+         }
+         p.passport.hgt.units = dimensionCM
+       case dimensionIN:
+	       // If in, the number must be at least 59 and at most 76.
+         if p._number >= 59 && p._number <= 76 {
+           p.passport.hgt.value = p._number
+         }
+         p.passport.hgt.units = dimensionIN
+       }
+     }
+
+HairColor
+  <- "hcl:" RGB
+     {
+	     // hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
+       p.passport.hcl = color(p._string)
+     }
+
+EyeColor
+  <- "ecl:" ColorLiteral
+     {
+	     // ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
+       p.passport.ecl = color(p._string)
+     }
+
+PassportID
+  <- "pid:" NumericString
+     {
+	     // pid (Passport ID) - a nine-digit number, including leading zeroes.
+       if len(p._string) == 9 {
+         p.passport.pid = p._string
+       }
+     }
+
+CountryID
+  <- "cid:" String
+     {
+       p.passport.cid = p._string
+     }
+
+Dimension
+  <- "cm"
+     {
+       p._string = "cm"
+     }
+  /  "in"
+     {
+       p._string = "in"
+     }
+
+RGB
+  <- "#" < [a-fA-F0-9]+ >
+     {
+       if len(text) == 6 {
+         p._string = "#" + text
+       }
+     }
+
+ColorLiteral
+  <- "amb" { p._string = "amb" }
+  /  "blu" { p._string = "blu" }
+  /  "brn" { p._string = "brn" }
+  /  "gry" { p._string = "gry" }
+  /  "grn" { p._string = "grn" }
+  /  "hzl" { p._string = "hzl" }
+  /  "oth" { p._string = "oth" }
+
+Number
+  <- < [0-9]+ >
+     {
+       v, _ := strconv.Atoi(text)
+       p._number = v
+     }
+
+NumericString
+  <- < [0-9]+ >
+     {
+       p._string = text
+     }
+
+String
+  <- < [a-zA-Z0-9_\-]+ >
+     {
+       p._string = text
+     }
+
+Spacing
+  <- HS+
+  /  EOL?
+
+HS
+  <- ' '
+  /  '\t'
+
+EOL
+  <- '\r\n'
+  /  '\n'
+  /  '\r'
+
+END <- !.
