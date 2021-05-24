@@ -1,0 +1,42 @@
+package bspparser
+
+type parser Peg {
+  seat Seat
+
+  _bspRow string
+  _bspCol string
+}
+
+Grammar
+  <- BSPRow BSPCol END
+     {
+       p.seat = NewSeat(p._bspRow, p._bspCol)
+     }
+
+BSPRow
+  <- < [FB]+ >
+     {
+       p._bspRow = ""
+       for _, v := range text {
+         if v == 'B' {
+           p._bspRow += "1"
+         } else {
+           p._bspRow += "0"
+         }
+       } 
+     }
+
+BSPCol
+  <- < [LR]+ >
+     {
+       p._bspCol = ""
+       for _, v := range text {
+         if v == 'R' {
+           p._bspCol += "1"
+         } else {
+           p._bspCol += "0"
+         }
+       } 
+     }
+
+END <- !.
