@@ -80,5 +80,5 @@ func (self intList) Sort() intList {
 
 	sort.Ints([]int(sorted))
 
-	return intList(sorted)
+	return sorted
 }
