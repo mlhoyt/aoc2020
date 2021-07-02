@@ -1,0 +1,102 @@
+package luggagerulesparser
+
+import "github.com/mlhoyt/aoc2020/go/pkg/types"
+
+type parser Peg {
+  specs types.LuggageBagSpecs
+
+  _key types.LuggageBagLabel
+
+  _count int
+  _modifier string
+  _color string
+
+  _number int
+  _string string
+}
+
+Grammar
+  <- BagSpec+ END
+
+BagSpec
+  <- BagKey _ "contain" _ ( BagValues / "no other bags" ) "." Spacing
+
+BagKey
+  <- BagLabel
+     {
+       p._key = types.LuggageBagLabel{
+         Modifier: p._modifier,
+         Color: p._color,
+       }
+
+       p.specs[p._key] = []types.LuggageBagLabelWithCount{}
+     }
+
+BagValues
+  <- BagValue ( "," _ BagValue )*
+
+BagValue
+  <- Count _ BagLabel
+     {
+       v := types.LuggageBagLabelWithCount{
+         LuggageBagLabel: types.LuggageBagLabel{
+           Modifier: p._modifier,
+           Color: p._color,
+         },
+         Count: p._count,
+       } 
+
+       p.specs[p._key] = append(p.specs[p._key], v)
+     }
+
+BagLabel
+  <- Modifier _ Color _ "bag" "s"?
+
+Modifier
+  <- String
+     {
+       p._modifier = p._string
+     }
+
+Color
+  <- String
+     {
+       p._color = p._string
+     }
+
+Count
+  <- Number
+     {
+       p._count = p._number
+     }
+
+Number
+  <- < [0-9]+ >
+     {
+       v, _ := strconv.Atoi(text)
+       p._number = v
+     }
+
+String
+  <- < [a-zA-Z0-9_\-]+ >
+     {
+       p._string = text
+     }
+
+Spacing
+  <- HS+
+  /  EOL?
+
+_
+  <- HS+
+
+HS
+  <- ' '
+  /  '\t'
+
+EOL
+  <- '\r\n'
+  /  '\n'
+  /  '\r'
+
+END <- !.
