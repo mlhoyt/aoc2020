@@ -7,12 +7,7 @@ use std::str::FromStr;
 fn main() {
     let input = include_str!("../../input/day08.txt");
 
-    let instrs: Vec<Instr> = input
-        .lines()
-        .map(|v| v.parse())
-        .filter(|v| v.is_ok())
-        .map(|v| v.unwrap())
-        .collect();
+    let instrs: Vec<Instr> = input.lines().filter_map(|v| v.parse().ok()).collect();
 
     let mut i = 0;
     loop {
