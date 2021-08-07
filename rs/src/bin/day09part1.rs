@@ -22,9 +22,7 @@ fn xmas_validate(input: &[u32], n: usize) -> Option<u32> {
 fn xmas_check_window(input: &[u32], value: u32) -> bool {
     generate_pairs(input)
         .iter()
-        .filter(|v| (v.0 + v.1 == value) && (v.0 != v.1))
-        .count()
-        > 0
+        .any(|v| (v.0 + v.1 == value) && (v.0 != v.1))
 }
 
 // This is leveraged from day01part1
