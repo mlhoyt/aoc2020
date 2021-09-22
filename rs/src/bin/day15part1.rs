@@ -31,8 +31,9 @@ pub fn main() {
     let result = seed
         .iter()
         .map(|&v| Some(v))
-        .chain(iter::repeat(None).take(NUM_ROUNDS - seed.len()))
+        .chain(iter::repeat(None))
         .enumerate()
+        .take(NUM_ROUNDS)
         .fold(0, |prev, (n, curr)| {
             let next = match curr {
                 Some(next) => next,
