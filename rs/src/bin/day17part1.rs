@@ -149,15 +149,16 @@ impl Cube {
             return Vec::new();
         }
 
-        let coords = self.state.iter().collect::<Vec<_>>();
+        let mut coords = self.state.iter();
+        let first_coord = coords.next().unwrap();
         let sr = (
-            (coords[0].x, coords[0].x),
-            (coords[0].y, coords[0].y),
-            (coords[0].z, coords[0].z),
+            (first_coord.x, first_coord.x),
+            (first_coord.y, first_coord.y),
+            (first_coord.z, first_coord.z),
         );
 
         let ((x_min, x_max), (y_min, y_max), (z_min, z_max)) =
-            coords.iter().fold(sr, |(xr, yr, zr), pt| {
+            coords.fold(sr, |(xr, yr, zr), pt| {
                 (
                     (xr.0.min(pt.x), xr.1.max(pt.x)),
                     (yr.0.min(pt.y), yr.1.max(pt.y)),
