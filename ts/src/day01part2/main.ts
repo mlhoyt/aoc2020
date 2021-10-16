@@ -23,7 +23,9 @@ function main(): void {
 }
 
 function generate_groups(xs: number[]): [number, number, number][] {
-    let groups = [];
+    // Not annotating the type of groups here infers 'any[]' which defeats the value of TypeScript
+    // and type annotations in general.
+    let groups: [number, number, number][] = [];
 
     xs.forEach((x, xi) => {
         let ys = xs.slice(xi+1,);
