@@ -27,7 +27,10 @@ fn main() {
         .flatten()
         .collect();
 
-    // initialize a matrix of the cartesian product of allergens and ingredients
+    // initialize a matrix (2d) of the cartesian product of allergens and ingredients
+    // The matrix is represented as a HashMap where the key is an allergen and ingredient tuple and
+    // the value is the number of times that allergen and ingredient pair are both listed in a
+    // food.
     let mut cp = Vec::new();
     for allergen in &allergens {
         for ingredient in &ingredients {
@@ -37,7 +40,8 @@ fn main() {
     let mut allergen_ingredients_matrix: HashMap<(String, String), usize> =
         cp.into_iter().map(|v| (v, 0)).collect();
 
-    // populate allergens-ingredients matrix by iterating over foods
+    // populate the allergens-ingredients matrix by counting the allergen and ingredient pair
+    // occurrences in the foods
     for food in &foods {
         if let Some(allergens) = &food.allergens {
             for allergen in allergens {
@@ -53,33 +57,39 @@ fn main() {
     // initialize ingredient-allergen map
     let mut ingredient_allergen_map: HashMap<String, String> = HashMap::new();
 
-    // repeatedly analyze allergens-ingredients matrix for standout ingredient
+    // repeatedly analyze the allergens-ingredients matrix until all allergens have been mapped to
+    // an ingredient
     let mut unmapped_allergens = allergens.clone();
     while unmapped_allergens.len() > 0 {
+        // initialize a list of allergens associated to an ingredient in this iteration
         let mut mapped_allergens: Vec<String> = Vec::new();
 
         unmapped_allergens.iter().for_each(|a| {
-            let oi = analyze_allergen(&allergen_ingredients_matrix, a);
-
-            if let Some(i) = oi {
+            // if one ingredient occurred more than any others for the allergen then we create an
+            // association and clear all values for that ingredient in the matrix.
+            if let Some(i) = analyze_allergen(&allergen_ingredients_matrix, a) {
+                // create an ingredient to allergen association
                 ingredient_allergen_map.insert(i.clone(), (*a).clone());
 
+                // clear all matrix values for the ingredient
                 allergens.iter().for_each(|a| {
                     allergen_ingredients_matrix
                         .entry(((*a).clone(), i.clone()))
                         .and_modify(|v| *v = 0);
                 });
 
+                // store the associated allergen for later removal from the unmapped list
                 mapped_allergens.push((*a).clone());
             }
         });
 
+        // remove allergens associated to an ingredient in this iteration from the unmapped list
         mapped_allergens.into_iter().for_each(|a| {
             unmapped_allergens.remove(&a);
         });
     }
 
-    // create a list of non-allergen ingredients
+    // create a set of non-allergen ingredients
     let non_allergen_ingredients: HashSet<_> = ingredients
         .iter()
         .filter(|v| !ingredient_allergen_map.contains_key(*v))
@@ -97,6 +107,8 @@ fn main() {
     println!("result: {}", result);
 }
 
+// analyze_allergen examines all the paired ingrediants in the matrix for one that occurs more than
+// any other.  If one such ingredient exists then it is returned, otherwise a None is returned.
 fn analyze_allergen(
     matrix: &HashMap<(String, String), usize>,
     allergen: &String,
