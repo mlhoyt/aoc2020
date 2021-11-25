@@ -1,0 +1,58 @@
+mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
+trh fvjkl sbzzf mxmxvkd (contains dairy)
+sqjhc fvjkl (contains soy)
+sqjhc mxmxvkd sbzzf (contains fish)
+
++---------+-------+-------+-------+
+|         | dairy |  fish |   soy |
++---------+-------+-------+-------+
+| fvjkl   |     1 |       |     1 |
+| kfcds   |     1 |     1 |       |
+| mxmxvkd |     2 |     2 |       |
+| nhms    |     1 |     1 |       |
+| sbzzf   |     1 |     1 |       |
+| sqjhc   |     1 |     2 |     1 |
+| trh     |     1 |       |       |
++---------+-------+-------+-------+
+
+mxmxvkd = dairy (max of dairy; only allergen with standout ingredient)
+
++---------+-------+-------+-------+
+|         | dairy |  fish |   soy |
++---------+-------+-------+-------+
+| fvjkl   |     - |       |     1 |
+| kfcds   |     - |     1 |       |
+| mxmxvkd |     x |     - |     - |
+| nhms    |     - |     1 |       |
+| sbzzf   |     - |     1 |       |
+| sqjhc   |     - |     2 |     1 |
+| trh     |     - |       |       |
++---------+-------+-------+-------+
+
+sqjhc = fish (max of fish; only remaining allergen with a standout ingredient)
+
++---------+-------+-------+-------+
+|         | dairy |  fish |   soy |
++---------+-------+-------+-------+
+| fvjkl   |     - |     - |     1 |
+| kfcds   |     - |     - |       |
+| mxmxvkd |     x |     - |     - |
+| nhms    |     - |     - |       |
+| sbzzf   |     - |     - |       |
+| sqjhc   |     - |     x |     - |
+| trh     |     - |     - |       |
++---------+-------+-------+-------+
+
+fvjkl = soy (max of soy; only remaining allergen with a standout ingredient)
+
++---------+-------+-------+-------+
+|         | dairy |  fish |   soy |
++---------+-------+-------+-------+
+| fvjkl   |     - |     - |     x |
+| kfcds   |     - |     - |     - | *
+| mxmxvkd |     x |     - |     - |
+| nhms    |     - |     - |     - | *
+| sbzzf   |     - |     - |     - | *
+| sqjhc   |     - |     x |     - |
+| trh     |     - |     - |     - | *
++---------+-------+-------+-------+
